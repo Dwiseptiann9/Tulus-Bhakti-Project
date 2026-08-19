@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg: #F9F8F6;
+    --surface: #FFFFFF;
+    --fg: #1A2F24;
+    --primary: #C85A40;
+    --primary-fg: #FFFFFF;
+    --line: #E5E2DC;
+    --muted: #F0EFEB;
+    --muted-fg: #6B7A70;
+    --accent: #1A2F24;
+
+    --background: 40 20% 98%;
+    --foreground: 156 28% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 156 28% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 156 28% 14%;
+    --primary-hsl: 12 55% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 14% 93%;
+    --secondary-foreground: 156 28% 14%;
+    --muted-hsl: 40 14% 93%;
+    --muted-foreground: 155 8% 45%;
+    --accent-hsl: 40 14% 93%;
+    --accent-foreground: 156 28% 14%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 12% 88%;
+    --input: 40 12% 88%;
+    --ring: 12 55% 52%;
+    --radius: 0.6rem;
+}
+
+body.theme-lebaran {
+    --bg: #F7FAF9;
+    --surface: #FFFFFF;
+    --fg: #0A1F16;
+    --primary: #054C38;
+    --line: #E0E8E5;
+    --muted: #EDF3F1;
+    --muted-fg: #4A6B5E;
+    --accent: #D4AF37;
+}
+
+body.theme-agustus17 {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --fg: #2B1A1A;
+    --primary: #D32F2F;
+    --line: #F0E6E6;
+    --muted: #F6EDED;
+    --muted-fg: #7A5C5C;
+    --accent: #2B1A1A;
+}
+
+body {
+    margin: 0;
+    font-family: 'Manrope', system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+    font-family: 'Bricolage Grotesque', 'Manrope', sans-serif;
+    letter-spacing: -0.03em;
+}
+
+.font-mono-data {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.25'/%3E%3C/svg%3E");
+}
+
+.link-underline {
+    position: relative;
+}
+.link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 2px;
+    width: 0;
+    background: var(--primary);
+    transition: width 0.28s ease;
+}
+.link-underline:hover::after { width: 100%; }
+
+@keyframes riseIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: riseIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+    .rise { animation: none; }
+}
+
+::selection { background: var(--primary); color: #fff; }
+
+@layer base {
+    * { @apply border-border; }
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+}

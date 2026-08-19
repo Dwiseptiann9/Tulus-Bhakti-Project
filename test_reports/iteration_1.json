@@ -1,0 +1,50 @@
+{
+  "summary": "First test run for Portal Desa Digital. Backend: wrote pytest suite covering 39 test cases across public content, auth, role gating, full finance flow (create->submit->approve->revision->receipt visibility->unpublish->delete), upload guardrails (nota censored), captcha+messages, stats, and audit log. 38/39 PASSED. Only failing test: brute-force lockout does not trigger because x-forwarded-for behind Kubernetes ingress presents a rotating proxy IP (e.g. 34.16.56.64 vs 35.225.230.28 vs 182.5.232.41 for same client), spreading login_attempts across many identifier keys so count never reaches MAX_ATTEMPTS=5. Frontend: verified all 8 public routes return 200 with expected content, language toggle button clicks, super admin login flow works end-to-end and dashboard renders full nav (Dashboard/Berita/Galeri/Anggota/RW-RT/Keuangan/FAQ/Inbox/Audit/Pengaturan/Kelola Akun), audit log entries and stats populated correctly, mobile 390px has zero horizontal overflow on home and /rw-rt. Public keuangan/finance detail arithmetic (total_in/total_out/balance) verified. Revision reason enforcement, receipt visibility super-only gating, and unpublish all working. Nota upload correctly rejects censored=false and accepts censored=true (WebP conversion succeeds via Emergent Object Storage).",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "Brute-force lockout NEVER triggers 429 in this environment. login_attempts identifier is ip:email where ip is derived from x-forwarded-for; behind the Kubernetes/CDN ingress the first x-forwarded-for token is the upstream proxy which rotates (observed: 34.16.56.64, 35.225.230.28, 182.5.232.41 all for the same 5-request client burst). Attempts get sharded so no single identifier ever reaches count>=5. Tested with 7 sequential curl requests: all returned 401, never 429. This defeats the account-lockout security control entirely.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Public pages while logged out",
+        "issue": "Every public route makes a GET /api/auth/me that returns 401 (expected for logged-out visitor) but the 401 shows up as a console error on every page load. Cosmetic/log-noise only; not blocking. Consider suppressing the error log when no auth cookie exists, or treating 401 on /auth/me as a normal signed-out signal.",
+        "affected_selectors": []
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix brute-force lockout so it works behind ingress. Options: (a) use the LAST public IP in x-forwarded-for chain rather than the first (which is the closest trusted proxy); or (b) also key login_attempts by email-only in addition to ip:email so a per-account lockout still fires regardless of source IP; option (b) is safer against distributed brute force. Recommend both: per-ip AND per-email counters, whichever hits MAX first triggers 429."
+  ],
+  "critical_code_review_comments": [
+    "core.client_ip returns the first x-forwarded-for token; that is the CLIENT IP only when the ingress is configured to append. In this deployment it appears to be the upstream proxy that changes per request. Use the last non-proxy IP or maintain an internal-CIDR skiplist. Also add per-email lockout to prevent distributed brute-force.",
+    "routers_finance.update_report: recompute is called on 'updates' dict (which does not include existing fields), and only new items are considered. Correct here because ReportBody always includes full items list, but relying on 'body.items = []' default means an update with no items key would silently zero out the report. Consider requiring items or making update partial.",
+    "server.seed_user: if the seeded password is unchanged it re-hashes on every restart? No, it only updates when verify_password fails - good. However it does not update the 'name' field on drift.",
+    "routers_misc.upload_file: 502 is raised when Emergent Object Storage fails; that failure would leak the exception string to the client. Consider sanitising."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (new)"
+  ],
+  "success_rate": {
+    "backend": "97% (38/39)",
+    "frontend": "100% of visited flows (public pages load, lang toggle clickable, super login + dashboard, mobile responsive)"
+  },
+  "test_credentials": "Super Admin superadmin@desadigital.id / Super#Desa2026; Admin admin@desadigital.id / Admin#Desa2026 (both verified working)",
+  "seed_data_creation": "Test suite creates and cleans up a TEST_ prefixed finance report end-to-end (draft->submitted->approved->revised->unpublished->deleted). No residual test data.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend test file at /app/backend/tests/backend_test.py runs in ~6s with pytest-xdist. Only known failure is TestAuth::test_bruteforce_lockout which is caused by ingress-rotating x-forwarded-for (a real backend bug, not a test issue). After main agent fixes client_ip / adds per-email lockout, re-run this file. All finance flow, role gating, receipt visibility, revision reason, upload nota guardrail, and captcha rate-limit tests already pass. For frontend, deeper flows not yet exercised: /berita/:slug detail navigation, /keuangan/:id revision-history rendering, gallery lightbox, contact form submission via UI, admin non-super role-gated nav hiding, admin CRUD via UI. Consider adding those in a follow-up UI test pass.",
+  "rca of the issue": "Brute-force lockout: login_attempts documents are keyed by identifier=ip:email. client_ip() reads request.headers['x-forwarded-for'].split(',')[0]. Behind the preview ingress the first value in that header is the upstream GCP LB IP which is not sticky per client, so 5 successive requests from the same tester produced 4 different identifier docs each with count in {1,2,4,5}. The 429 branch requires count>=5 on the SAME document, which never happens. Reproduction: run `for i in 1..7; curl -s -o /dev/null -w %{http_code} -X POST $BASE/api/auth/login -d '{\"email\":\"any\",\"password\":\"wrong\"}' -H 'Content-Type: application/json'` -> always 401. Mitigation: (1) parse x-forwarded-for from the right (skip known ingress CIDRs) OR (2) keep BOTH a per-email counter and a per-ip counter, trip 429 if either exceeds MAX. Option 2 also gives defence-in-depth against distributed attacks."
+}

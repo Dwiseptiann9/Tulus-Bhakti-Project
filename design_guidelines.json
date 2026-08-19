@@ -1,0 +1,156 @@
+{
+  "project_context": {
+    "name": "Portal Desa Digital",
+    "type": "Hybrid Fullstack (Public Civic Portal + Admin CMS)",
+    "audience": "Village residents, local officials, donors",
+    "emotional_tone": "Trustworthy, Transparent, Grounded, Communal",
+    "tech_stack": ["React", "Tailwind CSS", "FastAPI", "MongoDB"]
+  },
+  "theme_and_colors": {
+    "archetype": "Organic & Earthy (Arch Type 1) mixed with Swiss High-Contrast for Data",
+    "default_theme": "light",
+    "palettes": {
+      "netral": {
+        "background": "#F9F8F6",
+        "surface": "#FFFFFF",
+        "foreground": "#1A2F24",
+        "primary": "#C85A40",
+        "primary_foreground": "#FFFFFF",
+        "border": "#E5E2DC",
+        "muted": "#F0EFEB"
+      },
+      "lebaran": {
+        "primary": "#054C38",
+        "accent": "#D4AF37",
+        "background": "#F7FAF9",
+        "foreground": "#0A1F16",
+        "surface": "#FFFFFF",
+        "border": "#E0E8E5"
+      },
+      "agustus17": {
+        "primary": "#D32F2F",
+        "accent": "#FFFFFF",
+        "background": "#FAFAFA",
+        "foreground": "#2B1A1A",
+        "surface": "#FFFFFF",
+        "border": "#F0E6E6"
+      }
+    },
+    "rules": [
+      "Never use pure black #000000 or pure grey. Tint darks with deep green/brown.",
+      "No full-screen gradients. Use solid colors and subtle noise textures for depth.",
+      "Seasonal themes should be implemented as CSS classes (.theme-lebaran, .theme-agustus) applied to the body or root wrapper, altering CSS variables."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Cabinet Grotesk",
+      "body": "Manrope",
+      "mono_data": "IBM Plex Mono"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-tight",
+      "h3": "text-xl sm:text-2xl",
+      "body": "text-base leading-relaxed",
+      "overline": "text-xs tracking-[0.2em] uppercase"
+    },
+    "rules": [
+      "BANNED: Inter, Roboto, Open Sans for headings.",
+      "Headings must use tight tracking (-0.02em to -0.04em).",
+      "Data tables must use monospaced fonts for numerical alignment."
+    ]
+  },
+  "layout_and_spacing": {
+    "spacing_scale": "p-4, p-8, p-12, p-16, p-24, p-32",
+    "grid_systems": {
+      "public_portal": "Mode A: 'Tetris' Bento Grid (grid-cols-1 md:grid-cols-12, gap-8 to gap-12) for News and Home.",
+      "admin_dashboard": "Mode B: High Density Grid (grid-cols-1 md:grid-cols-4, tight gap-4) for CMS and Financial Analytics."
+    },
+    "rules": [
+      "Generous spacing: Use 2-3x more padding than usual for public pages (e.g., py-24 for sections).",
+      "Containers with borders MUST have internal padding (p-6 or p-8).",
+      "Mobile-first responsive. Images max-h-[80vh] on mobile."
+    ]
+  },
+  "components_and_surfaces": {
+    "headers": {
+      "style": "Crystal Glass",
+      "classes": "sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-black/5",
+      "rule": "Never use fully transparent header. Content must not be obscured."
+    },
+    "cards_public": {
+      "style": "Flat Solid",
+      "classes": "bg-white border border-[#E5E2DC] rounded-xl",
+      "hover": "hover:-translate-y-1 hover:shadow-lg transition-transform duration-300"
+    },
+    "financial_tables": {
+      "style": "Swiss High-Density",
+      "rules": "No alternating row colors. Use 1px light bottom border per row. Fixed sticky headers. 32-36px row heights."
+    },
+    "buttons": {
+      "style": "Pill-shaped or slightly rounded (rounded-full or rounded-lg)",
+      "interaction": "Must explicitly set hover text color. e.g., hover:bg-primary/90 hover:text-white"
+    },
+    "rules": [
+      "Use Shadcn UI (heavily customized) for Admin forms, modals, tables, and tabs.",
+      "Use custom raw HTML/Tailwind for Public Home, Gallery, and News layouts to avoid rigid structural constraints.",
+      "Use Sonner for toasts."
+    ]
+  },
+  "interactions_and_motion": {
+    "animation": "Minimal but deliberate. Smooth entrances (opacity + slight Y-translate) for lists and gallery items.",
+    "performance": "Crucial for slow networks. Implement Lazy Loading for all gallery images. Use React Suspense.",
+    "rules": [
+      "Respect prefers-reduced-motion.",
+      "Exclude transforms from universal transition (no 'transition: all').",
+      "Use 'transition-transform' and 'transition-opacity' explicitly."
+    ]
+  },
+  "media_and_images": {
+    "galleries": "Use Lightbox pattern for the 'Galeri per acara' feature.",
+    "image_urls": {
+      "hero_village": {
+        "url": "https://images.pexels.com/photos/15830193/pexels-photo-15830193.jpeg",
+        "description": "Farmers in lush green fields (Home/Hero)"
+      },
+      "village_community": {
+        "url": "https://images.unsplash.com/photo-1713634437183-f86ae928dcd4",
+        "description": "Colorful buildings (About Us/Community)"
+      },
+      "landscape": {
+        "url": "https://images.pexels.com/photos/33334654/pexels-photo-33334654.jpeg",
+        "description": "Aerial view of green valley (Footer or Section Break)"
+      },
+      "financial_thumbnail": {
+        "url": "https://images.pexels.com/photos/7947744/pexels-photo-7947744.jpeg",
+        "description": "Business chart (Laporan Keuangan section header)"
+      }
+    },
+    "rules": "Never use placeholder images. Max overlay opacity bg-black/40."
+  },
+  "accessibility_and_testing": {
+    "testing": "All interactive/key elements MUST include a 'data-testid' attribute (e.g., data-testid='contact-submit-btn').",
+    "contrast": "Text over images MUST have text-shadow or a gradient overlay to meet WCAG AA.",
+    "multi_language": "Provide clear toggle (ID/EN). Ensure UI doesn't break with longer English words."
+  },
+  "instructions_to_main_agent": [
+    "Install required fonts: @fontsource/cabinet-grotesk, @fontsource/manrope, @fontsource/ibm-plex-mono.",
+    "Install lucide-react for iconography.",
+    "Override tailwind.config.js to set the base theme and extend with the custom 'netral', 'lebaran', and 'agustus17' theme colors as CSS variables.",
+    "Create a ThemeContext in React to handle the seasonal toggle which swaps out CSS variables on the root.",
+    "Implement language translation context (ID/EN) wrapping the app.",
+    "Use Shadcn UI for the Admin CMS, but strip the default look to match the Earthy Organic brand (e.g. adjust border radius and spacing).",
+    "For the public 'Laporan Keuangan' (Financial Report) page, prioritize scannability and build a clean, transparent table UI with a PDF export button."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not converge toward generic AI slop aesthetics. Build creative, distinctive frontends.",
+    "DO NOT center align the app container (.App { text-align: center; } is BANNED).",
+    "NEVER use emoji characters for icons.",
+    "Every interaction needs micro-animations (hover states, transitions).",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "NEVER use placeholder image text. Use the provided URLs.",
+    "Create depth through layered design elements with z-index hierarchy and subtle borders.",
+    "Do not use dark colors as gradients."
+  ]
+}
