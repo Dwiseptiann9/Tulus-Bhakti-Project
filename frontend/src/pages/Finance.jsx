@@ -1,9 +1,96 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Printer, History, Receipt, EyeOff } from "lucide-react";
+import { ArrowLeft, Printer, History, Receipt, EyeOff, BarChart3 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { api, fileUrl, fmtDate, rupiah } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { Section, LangNote } from "@/components/PublicLayout";
+import { ShareButton } from "@/components/ShareButton";
+
+function YearlyChart() {
+  const { t } = useLang();
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    api.get("/finance/summary/yearly").then(({ data }) => setData(data)).catch(() => {});
+  }, []);
+
+  if (!data || data.years.length === 0) return null;
+  const rows = data.years.map((y) => ({
+    ...y,
+    [t("total_in")]: y.total_in,
+    [t("total_out")]: y.total_out,
+  }));
+  const compact = (v) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)} jt` : `${Math.round(v / 1000)} rb`);
+
+  return (
+    <div
+      className="mt-12 rounded-2xl border p-6 sm:p-8"
+      style={{ background: "var(--surface)", borderColor: "var(--line)" }}
+      data-testid="yearly-summary"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <BarChart3 size={20} style={{ color: "var(--primary)" }} /> {t("yearly_summary")}
+          </h2>
+          <p className="mt-2 text-sm max-w-xl" style={{ color: "var(--muted-fg)" }}>
+            {t("yearly_note")}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-wider" style={{ color: "var(--muted-fg)" }}>
+            {t("grand_total")}
+          </p>
+          <p className="font-mono-data text-lg font-semibold" style={{ color: "var(--primary)" }} data-testid="grand-balance">
+            {rupiah(data.grand_balance)}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 h-72 w-full" data-testid="yearly-chart">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+            <XAxis dataKey="year" tick={{ fontSize: 12 }} stroke="var(--muted-fg)" />
+            <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} stroke="var(--muted-fg)" width={60} />
+            <Tooltip formatter={(v) => rupiah(v)} contentStyle={{ borderRadius: 10, borderColor: "var(--line)", fontSize: 13 }} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Bar dataKey={t("total_in")} fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={54} />
+            <Bar dataKey={t("total_out")} fill="var(--muted-fg)" radius={[6, 6, 0, 0]} maxBarSize={54} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full text-sm" data-testid="yearly-table">
+          <thead>
+            <tr className="text-left text-xs uppercase tracking-wider" style={{ color: "var(--muted-fg)" }}>
+              <th className="py-2 pr-4 font-semibold">{t("year")}</th>
+              <th className="py-2 pr-4 font-semibold text-right">{t("total_in")}</th>
+              <th className="py-2 pr-4 font-semibold text-right">{t("total_out")}</th>
+              <th className="py-2 pr-4 font-semibold text-right">{t("balance")}</th>
+              <th className="py-2 font-semibold text-right">{t("reports_count")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.years.map((y) => (
+              <tr key={y.year} className="border-b" style={{ borderColor: "var(--line)" }} data-testid={`yearly-row-${y.year}`}>
+                <td className="py-2.5 pr-4 font-mono-data">{y.year}</td>
+                <td className="py-2.5 pr-4 text-right font-mono-data">{rupiah(y.total_in)}</td>
+                <td className="py-2.5 pr-4 text-right font-mono-data">{rupiah(y.total_out)}</td>
+                <td className="py-2.5 pr-4 text-right font-mono-data" style={{ color: "var(--primary)" }}>
+                  {rupiah(y.balance)}
+                </td>
+                <td className="py-2.5 text-right font-mono-data">{y.reports}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export function Finance() {
   const { t, lang, pick } = useLang();
@@ -19,6 +106,7 @@ export function Finance() {
       <p className="mt-5 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--muted-fg)" }}>
         {t("finance_intro")}
       </p>
+      <YearlyChart />
       <div className="mt-12 grid gap-5 md:grid-cols-2" data-testid="finance-list">
         {reports.length === 0 && (
           <p className="text-sm" style={{ color: "var(--muted-fg)" }}>
@@ -104,8 +192,7 @@ export function FinanceDetail() {
       </Link>
 
       <div className="mt-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold leading-tight">
+        <div>          <h1 className="font-display text-3xl sm:text-4xl font-extrabold leading-tight">
             {title.value}
             <LangNote show={title.fallback} />
           </h1>
@@ -121,6 +208,7 @@ export function FinanceDetail() {
         >
           <Printer size={15} /> {t("export_pdf")}
         </button>
+        <ShareButton title={title.value} testId="finance-share-wa" />
       </div>
 
       {desc.value && <p className="mt-6 text-sm leading-relaxed max-w-2xl">{desc.value}</p>}

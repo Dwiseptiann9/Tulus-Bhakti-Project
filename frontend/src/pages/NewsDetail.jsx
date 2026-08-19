@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { api, fileUrl, fmtDate } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { Section, LangNote } from "@/components/PublicLayout";
+import { ShareButton } from "@/components/ShareButton";
 
 export default function NewsDetail() {
   const { slug } = useParams();
@@ -69,6 +70,9 @@ export default function NewsDetail() {
         </p>
       )}
       <div className="mt-8 space-y-5 text-base leading-relaxed whitespace-pre-line">{body.value}</div>
+      <div className="mt-10">
+        <ShareButton title={title.value} testId="news-share-wa" />
+      </div>
       <p className="mt-12 text-xs" style={{ color: "var(--muted-fg)" }}>
         {t("last_updated")}: {fmtDate(item.updated_at, lang)} · {item.author}
       </p>

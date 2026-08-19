@@ -66,6 +66,12 @@ const dict = {
     news: "Berita",
     transparency: "Transparansi",
     finance_intro: "Setiap laporan di bawah ini telah melalui persetujuan Super Admin sebelum diterbitkan.",
+    share_wa: "Bagikan ke WhatsApp",
+    yearly_summary: "Ringkasan Kas Tahunan",
+    yearly_note: "Total penerimaan dan pengeluaran seluruh kegiatan yang laporannya sudah terbit.",
+    year: "Tahun",
+    reports_count: "laporan",
+    grand_total: "Total keseluruhan",
   },
   en: {
     nav_home: "Home",
@@ -132,6 +138,12 @@ const dict = {
     news: "News",
     transparency: "Transparency",
     finance_intro: "Every report below was approved by the Super Admin before publication.",
+    share_wa: "Share on WhatsApp",
+    yearly_summary: "Yearly Cash Summary",
+    yearly_note: "Total income and expenses across all activities with published reports.",
+    year: "Year",
+    reports_count: "reports",
+    grand_total: "Grand total",
   },
 };
 

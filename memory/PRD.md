@@ -28,6 +28,10 @@ Portal publik untuk Karang Taruna + Forum Desa: berita kegiatan, galeri, profil 
 - Fase 4: form kontak + captcha matematika + rate limit 5/jam per IP, inbox admin + notifikasi email, audit log, SEO meta + sitemap, upload dikompres ke WebP.
 - Uji: 38/39 backend test lulus pada iterasi 1; satu isu brute-force lockout ditemukan dan sudah diperbaiki + diverifikasi manual (429 setelah 5 percobaan).
 
+## Implemented (lanjutan, 2026-06)
+- Ringkasan Kas Tahunan publik di `/keuangan`: endpoint `GET /api/finance/summary/yearly` (agregasi laporan terbit per tahun) + grafik batang Recharts (masuk vs keluar), tabel per tahun, dan total keseluruhan.
+- Tombol "Bagikan ke WhatsApp" (`ShareButton`) di halaman detail berita dan detail laporan keuangan, memakai `wa.me/?text=` dengan judul + URL halaman.
+
 ## Backlog
 - P0: tidak ada yang terbuka.
 - P1: pengujian UI mendalam (CRUD via UI, lightbox, submit form kontak), unggah nota dengan blur (bukan hanya blok hitam), pagination berita bila konten bertambah.

@@ -53,6 +53,27 @@ async def list_reports():
     return reports
 
 
+@router.get("/finance/summary/yearly")
+async def yearly_summary():
+    reports = await db.finance.find({"status": PUBLISHED}, {"_id": 0}).to_list(500)
+    buckets = {}
+    for r in reports:
+        year = (r.get("event_date") or r.get("published_at") or "")[:4]
+        if not year:
+            continue
+        b = buckets.setdefault(year, {"year": year, "total_in": 0, "total_out": 0, "reports": 0})
+        b["total_in"] += r.get("total_in", 0)
+        b["total_out"] += r.get("total_out", 0)
+        b["reports"] += 1
+    rows = sorted(buckets.values(), key=lambda b: b["year"])
+    for b in rows:
+        b["balance"] = b["total_in"] - b["total_out"]
+    return {"years": rows,
+            "grand_total_in": sum(b["total_in"] for b in rows),
+            "grand_total_out": sum(b["total_out"] for b in rows),
+            "grand_balance": sum(b["balance"] for b in rows)}
+
+
 @router.get("/finance/{report_id}")
 async def get_report(report_id: str):
     doc = await db.finance.find_one({"id": report_id, "status": PUBLISHED}, {"_id": 0})
