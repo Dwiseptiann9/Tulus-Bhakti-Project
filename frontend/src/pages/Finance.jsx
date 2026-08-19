@@ -10,17 +10,20 @@ import { ShareButton } from "@/components/ShareButton";
 function YearlyChart() {
   const { t } = useLang();
   const [data, setData] = useState(null);
+  const [selected, setSelected] = useState("all");
 
   useEffect(() => {
     api.get("/finance/summary/yearly").then(({ data }) => setData(data)).catch(() => {});
   }, []);
 
   if (!data || data.years.length === 0) return null;
-  const rows = data.years.map((y) => ({
+  const visible = selected === "all" ? data.years : data.years.filter((y) => y.year === selected);
+  const rows = visible.map((y) => ({
     ...y,
     [t("total_in")]: y.total_in,
     [t("total_out")]: y.total_out,
   }));
+  const shownBalance = visible.reduce((s, y) => s + y.balance, 0);
   const compact = (v) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)} jt` : `${Math.round(v / 1000)} rb`);
 
   return (
@@ -38,13 +41,29 @@ function YearlyChart() {
             {t("yearly_note")}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs uppercase tracking-wider" style={{ color: "var(--muted-fg)" }}>
-            {t("grand_total")}
-          </p>
-          <p className="font-mono-data text-lg font-semibold" style={{ color: "var(--primary)" }} data-testid="grand-balance">
-            {rupiah(data.grand_balance)}
-          </p>
+        <div className="flex items-center gap-5">
+          <select
+            data-testid="yearly-year-filter"
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="px-4 py-2.5 rounded-full border text-sm"
+            style={{ borderColor: "var(--line)", background: "var(--surface)" }}
+          >
+            <option value="all">{t("all_years")}</option>
+            {data.years.map((y) => (
+              <option key={y.year} value={y.year}>
+                {y.year}
+              </option>
+            ))}
+          </select>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-wider" style={{ color: "var(--muted-fg)" }}>
+              {selected === "all" ? t("grand_total") : `${t("balance")} ${selected}`}
+            </p>
+            <p className="font-mono-data text-lg font-semibold" style={{ color: "var(--primary)" }} data-testid="grand-balance">
+              {rupiah(shownBalance)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -75,7 +94,12 @@ function YearlyChart() {
           </thead>
           <tbody>
             {data.years.map((y) => (
-              <tr key={y.year} className="border-b" style={{ borderColor: "var(--line)" }} data-testid={`yearly-row-${y.year}`}>
+              <tr
+                key={y.year}
+                className="border-b"
+                style={{ borderColor: "var(--line)", opacity: selected === "all" || selected === y.year ? 1 : 0.35 }}
+                data-testid={`yearly-row-${y.year}`}
+              >
                 <td className="py-2.5 pr-4 font-mono-data">{y.year}</td>
                 <td className="py-2.5 pr-4 text-right font-mono-data">{rupiah(y.total_in)}</td>
                 <td className="py-2.5 pr-4 text-right font-mono-data">{rupiah(y.total_out)}</td>
@@ -208,7 +232,7 @@ export function FinanceDetail() {
         >
           <Printer size={15} /> {t("export_pdf")}
         </button>
-        <ShareButton title={title.value} testId="finance-share-wa" />
+        <ShareButton title={title.value} sharePath={`/share/keuangan/${r.id}`} testId="finance-share-wa" />
       </div>
 
       {desc.value && <p className="mt-6 text-sm leading-relaxed max-w-2xl">{desc.value}</p>}

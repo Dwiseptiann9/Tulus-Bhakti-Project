@@ -30,7 +30,9 @@ Portal publik untuk Karang Taruna + Forum Desa: berita kegiatan, galeri, profil 
 
 ## Implemented (lanjutan, 2026-06)
 - Ringkasan Kas Tahunan publik di `/keuangan`: endpoint `GET /api/finance/summary/yearly` (agregasi laporan terbit per tahun) + grafik batang Recharts (masuk vs keluar), tabel per tahun, dan total keseluruhan.
-- Tombol "Bagikan ke WhatsApp" (`ShareButton`) di halaman detail berita dan detail laporan keuangan, memakai `wa.me/?text=` dengan judul + URL halaman.
+- Tombol "Bagikan ke WhatsApp" (`ShareButton`) di halaman detail berita dan detail laporan keuangan.
+- Kartu gambar bagikan otomatis: `GET /api/og/news/{slug}.png` dan `GET /api/og/finance/{id}.png` menghasilkan kartu 1200x630 (Pillow) mengikuti warna tema musiman aktif; laporan keuangan menampilkan total masuk/keluar/saldo. Tautan bagikan mengarah ke landing `GET /api/share/berita/{slug}` & `/api/share/keuangan/{id}` yang menyajikan meta Open Graph lalu redirect ke halaman SPA — perlu karena crawler WhatsApp tidak menjalankan JavaScript.
+- Filter tahun pada grafik Ringkasan Kas Tahunan (dropdown Semua tahun / per tahun), saldo ringkasan mengikuti pilihan.
 
 ## Backlog
 - P0: tidak ada yang terbuka.

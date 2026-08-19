@@ -9,6 +9,7 @@ import routers_auth
 import routers_content
 import routers_finance
 import routers_misc
+import routers_share
 from storage import init_storage
 
 logging.basicConfig(level=logging.INFO,
@@ -28,6 +29,7 @@ api_router.include_router(routers_auth.router)
 api_router.include_router(routers_content.router)
 api_router.include_router(routers_finance.router)
 api_router.include_router(routers_misc.router)
+api_router.include_router(routers_share.router)
 app.include_router(api_router)
 
 origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",")]

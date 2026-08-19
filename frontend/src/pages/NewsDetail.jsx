@@ -71,7 +71,7 @@ export default function NewsDetail() {
       )}
       <div className="mt-8 space-y-5 text-base leading-relaxed whitespace-pre-line">{body.value}</div>
       <div className="mt-10">
-        <ShareButton title={title.value} testId="news-share-wa" />
+        <ShareButton title={title.value} sharePath={`/share/berita/${item.slug}`} testId="news-share-wa" />
       </div>
       <p className="mt-12 text-xs" style={{ color: "var(--muted-fg)" }}>
         {t("last_updated")}: {fmtDate(item.updated_at, lang)} · {item.author}
