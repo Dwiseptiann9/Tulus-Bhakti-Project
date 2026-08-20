@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays, Mail, Images, Newspaper } from "lucide-react";
-import { api, newsImage, fmtDate, rupiah } from "@/lib/api";
+import { api, newsImage, fileUrl, fmtDate, rupiah } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { useSettings } from "@/context/SettingsContext";
 import { Section, LangNote } from "@/components/PublicLayout";
@@ -208,14 +208,19 @@ export default function Home() {
               <Link
                 key={a.id}
                 to={`/galeri/${a.id}`}
-                className="rounded-xl border p-6 transition-transform hover:-translate-y-1"
+                className="rounded-xl border overflow-hidden transition-transform hover:-translate-y-1"
                 style={{ background: "var(--surface)", borderColor: "var(--line)" }}
                 data-testid={`home-album-${a.id}`}
               >
-                <p className="font-display font-bold">{pick(a, "title").value}</p>
-                <p className="text-xs mt-2 font-mono-data" style={{ color: "var(--muted-fg)" }}>
-                  {a.photo_count} {t("photos")} · {fmtDate(a.event_date, lang)}
-                </p>
+                {a.cover_display && (
+                  <img src={fileUrl(a.cover_display)} alt="" loading="lazy" className="w-full h-40 object-cover" />
+                )}
+                <div className="p-6">
+                  <p className="font-display font-bold">{pick(a, "title").value}</p>
+                  <p className="text-xs mt-2 font-mono-data" style={{ color: "var(--muted-fg)" }}>
+                    {a.photo_count} {t("photos")} · {fmtDate(a.event_date, lang)}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>

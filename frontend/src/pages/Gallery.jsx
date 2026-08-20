@@ -32,10 +32,12 @@ export function Gallery() {
               className="rise rounded-xl border overflow-hidden transition-transform hover:-translate-y-1"
               style={{ background: "var(--surface)", borderColor: "var(--line)", animationDelay: `${i * 50}ms` }}
             >
-              {a.cover_file_id ? (
-                <img src={fileUrl(a.cover_file_id)} alt="" loading="lazy" className="w-full h-48 object-cover" />
+              {a.cover_display ? (
+                <img src={fileUrl(a.cover_display)} alt="" loading="lazy" className="w-full h-48 object-cover" />
               ) : (
-                <div className="h-48" style={{ background: "var(--muted)" }} />
+                <div className="h-48 grid place-items-center text-xs" style={{ background: "var(--muted)", color: "var(--muted-fg)" }}>
+                  {t("no_data")}
+                </div>
               )}
               <div className="p-6">
                 <h2 className="font-display text-lg font-bold">

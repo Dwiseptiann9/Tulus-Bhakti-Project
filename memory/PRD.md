@@ -42,6 +42,10 @@ Dipilih Super Admin di `/admin/pengaturan`, tersimpan di `settings.season_theme`
 4. `kemerdekaan` — palet merah/putih + motif garuda, bendera, bintang, dan strip merah-putih.
 Komponen: `components/ThemeDecor.jsx` (`ThemeRibbon`, `ThemeHeroDecor`, `ThemeAccentIcon`); kartu bagikan OG mengikuti warna tema. Nilai lama `lebaran`/`agustus17` otomatis dipetakan ke tema baru.
 
+## Implemented (lanjutan)
+- Pratinjau tema di `/admin/pengaturan`: komponen `ThemePreview` (di `ThemeDecor.jsx`) menampilkan contoh header, ribbon ucapan, hero, dan palet warna sesuai pilihan dropdown sebelum disimpan. Variabel tema kini juga berlaku pada kelas `.theme-*` (bukan hanya `body.theme-*`) agar bisa di-scope ke pratinjau.
+- Cover otomatis galeri: `GET /api/albums` dan `/api/albums/{id}` mengembalikan `cover_display` = cover pilihan admin, atau foto pertama album bila kosong. Dipakai di halaman Galeri dan kartu galeri beranda.
+
 ## Backlog
 - P0: tidak ada yang terbuka.
 - P1: pengujian UI mendalam (CRUD via UI, lightbox, submit form kontak), unggah nota dengan blur (bukan hanya blok hitam), pagination berita bila konten bertambah.

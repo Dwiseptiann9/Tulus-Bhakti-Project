@@ -138,7 +138,7 @@ export default function GalleryAdmin() {
               />
             </Field>
             <ImageUpload
-              label="Cover album"
+              label="Cover album (opsional — bila kosong dipakai foto pertama)"
               kind="galeri"
               value={form.cover_file_id}
               onChange={(id) => setForm({ ...form, cover_file_id: id })}

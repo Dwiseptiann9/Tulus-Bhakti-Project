@@ -131,12 +131,19 @@ async def delete_news(news_id: str, user: dict = Depends(require_admin)):
 
 
 # ---------- Galeri ----------
+async def _first_photo_id(album_id: str):
+    """Cover otomatis: foto pertama album bila admin belum memilih cover."""
+    first = await db.photos.find({"album_id": album_id}, {"_id": 0, "file_id": 1}).sort("created_at", 1).to_list(1)
+    return first[0]["file_id"] if first else None
+
+
 @router.get("/albums")
 async def list_albums(include_draft: bool = False):
     query = {} if include_draft else {"published": True}
     albums = await db.albums.find(query, {"_id": 0}).sort("event_date", -1).to_list(200)
     for a in albums:
         a["photo_count"] = await db.photos.count_documents({"album_id": a["id"]})
+        a["cover_display"] = a.get("cover_file_id") or await _first_photo_id(a["id"])
     return albums
 
 
@@ -146,6 +153,7 @@ async def get_album(album_id: str):
     if not album:
         raise HTTPException(status_code=404, detail="Album tidak ditemukan")
     album["photos"] = await db.photos.find({"album_id": album_id}, {"_id": 0}).sort("created_at", 1).to_list(500)
+    album["cover_display"] = album.get("cover_file_id") or (album["photos"][0]["file_id"] if album["photos"] else None)
     return album
 
 

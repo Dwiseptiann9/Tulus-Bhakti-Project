@@ -4,6 +4,7 @@ import { Trash2, MailOpen, Plus } from "lucide-react";
 import { api, errText, fmtDate } from "@/lib/api";
 import { AdminLayout, Btn, Card, Field, input, inputStyle } from "@/components/AdminLayout";
 import { ImageUpload } from "@/components/Uploads";
+import { ThemePreview } from "@/components/ThemeDecor";
 import { useSettings } from "@/context/SettingsContext";
 
 export function InboxAdmin() {
@@ -210,6 +211,15 @@ export function SettingsAdmin() {
                 <option value="kemerdekaan">Hari Kemerdekaan (garuda, merah putih)</option>
               </select>
             </Field>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--muted-fg)" }}>
+                Pratinjau tema (belum disimpan)
+              </p>
+              <ThemePreview theme={form.season_theme} />
+              <p className="text-xs mt-2" style={{ color: "var(--muted-fg)" }}>
+                Tampilan di atas hanya contoh. Tekan "Simpan pengaturan" untuk menerapkannya ke portal publik.
+              </p>
+            </div>
             <Field label="Nama organisasi (pisahkan dengan koma)">
               <input
                 data-testid="settings-orgs"

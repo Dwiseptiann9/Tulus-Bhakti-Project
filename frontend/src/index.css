@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root, .theme-netral {
     --bg: #F9F8F6;
     --surface: #FFFFFF;
     --fg: #1A2F24;
@@ -37,7 +37,7 @@
     --radius: 0.6rem;
 }
 
-body.theme-idul_fitri {
+body.theme-idul_fitri, .theme-idul_fitri {
     --bg: #F6FAF7;
     --surface: #FFFFFF;
     --fg: #0C231A;
@@ -48,7 +48,7 @@ body.theme-idul_fitri {
     --accent: #D4A017;
 }
 
-body.theme-idul_adha {
+body.theme-idul_adha, .theme-idul_adha {
     --bg: #FAF7F2;
     --surface: #FFFFFF;
     --fg: #2A1D12;
@@ -59,7 +59,7 @@ body.theme-idul_adha {
     --accent: #C8A46A;
 }
 
-body.theme-kemerdekaan {
+body.theme-kemerdekaan, .theme-kemerdekaan {
     --bg: #FBFAFA;
     --surface: #FFFFFF;
     --fg: #221414;

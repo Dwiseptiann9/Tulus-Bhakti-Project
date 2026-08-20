@@ -127,6 +127,91 @@ export const useThemeMotif = () => {
   return { theme, config: CONFIG[theme] || null };
 };
 
+export const themeConfig = (theme) => CONFIG[theme] || null;
+
+// Pratinjau tema untuk halaman pengaturan: menumpang kelas .theme-* sehingga
+// variabel warna ikut berubah tanpa menyentuh tampilan portal yang aktif.
+export const ThemePreview = ({ theme = "netral" }) => {
+  const { lang } = useLang();
+  const config = themeConfig(theme);
+  const Motifs = config ? config.motifs : [];
+
+  return (
+    <div
+      className={`theme-${theme} rounded-xl border overflow-hidden`}
+      style={{ background: "var(--bg)", borderColor: "var(--line)", color: "var(--fg)" }}
+      data-testid={`theme-preview-${theme}`}
+    >
+      <div
+        className="flex items-center justify-between gap-3 px-4 h-12 border-b"
+        style={{ background: "var(--surface)", borderColor: "var(--line)" }}
+      >
+        <span className="flex items-center gap-2 min-w-0">
+          <span
+            className="h-6 w-6 grid place-items-center rounded-md text-[9px] font-bold text-white"
+            style={{ background: "var(--primary)" }}
+          >
+            KT
+          </span>
+          <span className="font-display text-xs font-bold truncate">Portal Desa</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-[10px] px-2 py-1 rounded-full border" style={{ borderColor: "var(--line)" }}>
+            ID
+          </span>
+          <span className="text-[10px] px-2.5 py-1 rounded-full text-white" style={{ background: "var(--primary)" }}>
+            Admin
+          </span>
+        </span>
+      </div>
+
+      {config && (
+        <div
+          className="relative overflow-hidden border-b px-4 py-2 flex items-center justify-center"
+          style={{ background: "var(--muted)", borderColor: "var(--line)", color: "var(--primary)" }}
+        >
+          <span className="absolute inset-0 flex items-center gap-6 opacity-[0.25]">
+            {Array.from({ length: 10 }, (_, i) => {
+              const M = Motifs[i % Motifs.length];
+              return <M key={i} size={20} />;
+            })}
+          </span>
+          <span className="relative text-[10px] font-semibold text-center" style={{ color: "var(--fg)" }}>
+            {config.greeting[lang] || config.greeting.id}
+          </span>
+        </div>
+      )}
+
+      <div className="relative overflow-hidden px-5 py-7" style={{ background: "var(--primary)" }}>
+        {config && (
+          <span className="absolute right-3 top-2 text-white/25">
+            {(() => {
+              const M = Motifs[0];
+              return <M size={64} />;
+            })()}
+          </span>
+        )}
+        <p className="text-[9px] uppercase tracking-[0.2em] text-white/70">Karang Taruna</p>
+        <p className="mt-1.5 font-display text-lg font-extrabold text-white leading-tight">Beranda Portal</p>
+        <span className="mt-4 inline-block text-[10px] font-semibold px-3 py-1.5 rounded-full bg-white/15 text-white border border-white/25">
+          Berita & Kegiatan
+        </span>
+      </div>
+
+      <div className="p-4 flex items-center gap-2">
+        {["--primary", "--accent", "--muted", "--surface"].map((v) => (
+          <span
+            key={v}
+            className="h-6 flex-1 rounded-md border"
+            style={{ background: `var(${v})`, borderColor: "var(--line)" }}
+            title={v}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Strip dekoratif di bawah header: motif berjalan + ucapan musiman
 export const ThemeRibbon = () => {
   const { lang } = useLang();
