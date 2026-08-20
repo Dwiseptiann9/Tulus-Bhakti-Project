@@ -54,6 +54,9 @@ Komponen: `components/ThemeDecor.jsx` (`ThemeRibbon`, `ThemeHeroDecor`, `ThemeAc
 - Menu Sponsor & Dukungan: koleksi `partners` (nama, jenis sponsor/support, logo, tautan, urutan), CRUD di `/admin/sponsor`, halaman publik `/sponsor` + strip logo di beranda.
 - Impor keuangan via Excel: `GET /api/admin/finance-template.xlsx` (template + sheet Petunjuk) dan `POST /api/admin/finance-parse-excel` (validasi jenis/tanggal/jumlah, laporan error per baris) — hasil parsing masuk sebagai item draft, nota tetap wajib lewat alat sensor.
 
+## Implemented (lanjutan 3)
+- Kelola urutan banner: thumbnail banner di Pengaturan bernomor dan punya tombol geser kiri/kanan (urutan kiri→kanan = urutan tampil), plus kolom "Lama tampil tiap banner (detik)" yang tersimpan sebagai `settings.banner_interval` (validasi server 3–60 detik) dan dipakai oleh slideshow beranda.
+
 ## Backlog
 - P0: tidak ada yang terbuka.
 - P1: pengujian UI mendalam (CRUD via UI, lightbox, submit form kontak), unggah nota dengan blur (bukan hanya blok hitam), pagination berita bila konten bertambah.

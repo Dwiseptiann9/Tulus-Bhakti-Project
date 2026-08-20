@@ -20,9 +20,10 @@ export default function Home() {
 
   useEffect(() => {
     if (slides.length < 2) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), 6000);
+    const gap = Math.min(Math.max(Number(settings.banner_interval) || 6, 3), 60) * 1000;
+    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), gap);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, settings.banner_interval]);
 
   const tagline = lang === "en" ? settings.tagline_en || settings.tagline_id : settings.tagline_id;
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, MailOpen, Plus } from "lucide-react";
+import { Trash2, MailOpen, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { api, errText, fmtDate } from "@/lib/api";
 import { AdminLayout, Btn, Card, Field, input, inputStyle } from "@/components/AdminLayout";
 import { ImageUpload } from "@/components/Uploads";
@@ -120,6 +120,7 @@ export function SettingsAdmin() {
         season_theme: settings.season_theme || "netral",
         logo_file_ids: settings.logo_file_ids || [],
         banner_file_ids: settings.banner_file_ids || [],
+        banner_interval: settings.banner_interval || 6,
         org_names: settings.org_names || [],
         show_population: settings.show_population !== false,
         contact_email: settings.contact_email || "",
@@ -141,7 +142,7 @@ export function SettingsAdmin() {
   const save = async (e) => {
     e.preventDefault();
     try {
-      await api.put("/admin/settings", form);
+      await api.put("/admin/settings", { ...form, banner_interval: Number(form.banner_interval) || 6 });
       toast.success("Pengaturan disimpan");
       reloadSettings();
     } catch (err) {
@@ -265,16 +266,55 @@ export function SettingsAdmin() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--muted-fg)" }}>
-                Banner beranda (bisa lebih dari satu, tampil bergantian)
+                Banner beranda (urutan kiri ke kanan = urutan tampil)
               </p>
-              <div className="flex flex-wrap items-center gap-3">
-                {form.banner_file_ids.map((id) => (
+              <div className="flex flex-wrap items-start gap-4 pb-6" data-testid="banner-manager">
+                {form.banner_file_ids.map((id, i) => (
                   <span key={id} className="relative">
                     <img
                       src={`${process.env.REACT_APP_BACKEND_URL}/api/files/${id}`}
                       alt=""
                       className="h-16 w-28 object-cover border rounded-lg"
                     />
+                    <span
+                      className="absolute top-1 left-1 text-[10px] font-bold px-1.5 rounded font-mono-data text-white"
+                      style={{ background: "rgba(0,0,0,0.6)" }}
+                      data-testid={`banner-order-${i}`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="absolute -bottom-3 left-0 right-0 flex justify-center gap-1">
+                      <button
+                        type="button"
+                        disabled={i === 0}
+                        onClick={() => {
+                          const next = [...form.banner_file_ids];
+                          [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                          setForm({ ...form, banner_file_ids: next });
+                        }}
+                        className="grid place-items-center h-6 w-6 rounded-full border disabled:opacity-30"
+                        style={{ background: "var(--surface)", borderColor: "var(--line)" }}
+                        data-testid={`banner-left-${i}`}
+                        aria-label="Geser ke kiri"
+                      >
+                        <ChevronLeft size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={i === form.banner_file_ids.length - 1}
+                        onClick={() => {
+                          const next = [...form.banner_file_ids];
+                          [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                          setForm({ ...form, banner_file_ids: next });
+                        }}
+                        className="grid place-items-center h-6 w-6 rounded-full border disabled:opacity-30"
+                        style={{ background: "var(--surface)", borderColor: "var(--line)" }}
+                        data-testid={`banner-right-${i}`}
+                        aria-label="Geser ke kanan"
+                      >
+                        <ChevronRight size={12} />
+                      </button>
+                    </span>
                     <button
                       type="button"
                       onClick={() =>
@@ -295,8 +335,22 @@ export function SettingsAdmin() {
                   onChange={(id) => id && setForm({ ...form, banner_file_ids: [...form.banner_file_ids, id] })}
                 />
               </div>
+              <div className="mt-6 max-w-xs">
+                <Field label="Lama tampil tiap banner (detik)">
+                  <input
+                    type="number"
+                    min={3}
+                    max={60}
+                    data-testid="settings-banner-interval"
+                    className={input}
+                    style={inputStyle}
+                    value={form.banner_interval}
+                    onChange={(e) => setForm({ ...form, banner_interval: e.target.value })}
+                  />
+                </Field>
+              </div>
               <p className="text-xs mt-2" style={{ color: "var(--muted-fg)" }}>
-                Disarankan gambar melebar (misal 1920×1080). Bila kosong, dipakai banner bawaan.
+                Disarankan gambar melebar (misal 1920×1080). Bila kosong, dipakai banner bawaan. Rentang lama tampil 3–60 detik.
               </p>
             </div>
 

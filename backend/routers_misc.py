@@ -74,6 +74,7 @@ class SettingsBody(BaseModel):
     season_theme: str = Field(default="netral", pattern="^(netral|idul_fitri|idul_adha|kemerdekaan)$")
     logo_file_ids: list[str] = []
     banner_file_ids: list[str] = []
+    banner_interval: int = Field(default=6, ge=3, le=60)
     org_names: list[str] = []
     show_population: bool = True
     contact_email: Optional[str] = None
