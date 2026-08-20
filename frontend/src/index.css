@@ -70,6 +70,22 @@ body.theme-kemerdekaan, .theme-kemerdekaan {
     --accent: #221414;
 }
 
+body.dark {
+    --bg: #0F1512;
+    --surface: #161E1A;
+    --fg: #E9EEEA;
+    --line: #27322C;
+    --muted: #1C2621;
+    --muted-fg: #9DACA3;
+}
+
+body.dark.theme-netral { --primary: #E0745A; --accent: #E9EEEA; }
+body.dark.theme-idul_fitri { --primary: #2FA57C; --accent: #E8BE4A; --bg: #0B1310; --surface: #131D18; }
+body.dark.theme-idul_adha { --primary: #C08A4E; --accent: #E0C48E; --bg: #14100B; --surface: #1D1811; --line: #2E2721; --muted: #221C15; }
+body.dark.theme-kemerdekaan { --primary: #E23A45; --accent: #F2F2F2; --bg: #140F0F; --surface: #1D1616; --line: #2F2424; --muted: #241B1B; }
+
+body.dark img.logo-safe { filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.45)); }
+
 @keyframes floatY {
     0%, 100% { transform: translateY(0) rotate(var(--spin, 0deg)); }
     50% { transform: translateY(-10px) rotate(var(--spin, 0deg)); }

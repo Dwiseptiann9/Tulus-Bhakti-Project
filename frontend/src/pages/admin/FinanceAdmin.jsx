@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Send, CheckCircle2, XCircle, EyeOff, Eye, Receipt, History } from "lucide-react";
+import { Plus, Trash2, Send, CheckCircle2, XCircle, EyeOff, Eye, Receipt, History, FileSpreadsheet, Download } from "lucide-react";
 import { api, errText, fileUrl, fmtDate, rupiah } from "@/lib/api";
 import { AdminLayout, Btn, Card, Field, input, inputStyle } from "@/components/AdminLayout";
 import { ReceiptCensor } from "@/components/Uploads";
@@ -37,6 +37,39 @@ export default function FinanceAdmin() {
   const [item, setItem] = useState(null);
   const [censorFor, setCensorFor] = useState(false);
   const [reason, setReason] = useState("");
+  const excelRef = useRef(null);
+
+  const downloadTemplate = async () => {
+    try {
+      const { data } = await api.get("/admin/finance-template.xlsx", { responseType: "blob" });
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "template-laporan-keuangan.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(errText(err));
+    }
+  };
+
+  const importExcel = async (file) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const { data } = await api.post("/admin/finance-parse-excel", fd);
+      setForm((prev) => {
+        const base = prev || { ...emptyReport, items: [] };
+        return { ...base, items: [...(base.items || []), ...data.items] };
+      });
+      toast.success(`${data.items.length} item diimpor dari Excel`);
+      if (data.errors?.length) toast.error(`${data.errors.length} baris dilewati: ${data.errors[0]}`);
+    } catch (err) {
+      toast.error(errText(err));
+    }
+    if (excelRef.current) excelRef.current.value = "";
+  };
 
   const load = () => api.get("/admin/finance").then(({ data }) => setReports(data)).catch(() => {});
 
@@ -109,11 +142,31 @@ export default function FinanceAdmin() {
     <AdminLayout
       title="Modul Keuangan"
       actions={
-        <Btn onClick={() => setForm({ ...emptyReport, items: [] })} data-testid="finance-new-btn">
-          <span className="flex items-center gap-2">
-            <Plus size={14} /> Laporan baru
-          </span>
-        </Btn>
+        <>
+          <input
+            ref={excelRef}
+            type="file"
+            accept=".xlsx,.xlsm"
+            className="hidden"
+            onChange={(e) => importExcel(e.target.files?.[0])}
+            data-testid="finance-excel-input"
+          />
+          <Btn variant="ghost" onClick={downloadTemplate} data-testid="finance-template-btn">
+            <span className="flex items-center gap-2">
+              <Download size={14} /> Template Excel
+            </span>
+          </Btn>
+          <Btn variant="ghost" onClick={() => excelRef.current?.click()} data-testid="finance-import-btn">
+            <span className="flex items-center gap-2">
+              <FileSpreadsheet size={14} /> Impor Excel
+            </span>
+          </Btn>
+          <Btn onClick={() => setForm({ ...emptyReport, items: [] })} data-testid="finance-new-btn">
+            <span className="flex items-center gap-2">
+              <Plus size={14} /> Laporan baru
+            </span>
+          </Btn>
+        </>
       }
     >
       {form && (
@@ -163,11 +216,23 @@ export default function FinanceAdmin() {
                 <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted-fg)" }}>
                   Rincian masuk / keluar
                 </p>
-                <Btn type="button" variant="ghost" onClick={() => setItem({ ...emptyItem })} data-testid="item-add-btn">
-                  <span className="flex items-center gap-2">
-                    <Plus size={13} /> Tambah item
-                  </span>
-                </Btn>
+                <div className="flex gap-2">
+                  <Btn
+                    type="button"
+                    variant="ghost"
+                    onClick={() => excelRef.current?.click()}
+                    data-testid="form-import-excel-btn"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FileSpreadsheet size={13} /> Impor Excel
+                    </span>
+                  </Btn>
+                  <Btn type="button" variant="ghost" onClick={() => setItem({ ...emptyItem })} data-testid="item-add-btn">
+                    <span className="flex items-center gap-2">
+                      <Plus size={13} /> Tambah item
+                    </span>
+                  </Btn>
+                </div>
               </div>
 
               {item && (

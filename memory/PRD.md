@@ -46,6 +46,14 @@ Komponen: `components/ThemeDecor.jsx` (`ThemeRibbon`, `ThemeHeroDecor`, `ThemeAc
 - Pratinjau tema di `/admin/pengaturan`: komponen `ThemePreview` (di `ThemeDecor.jsx`) menampilkan contoh header, ribbon ucapan, hero, dan palet warna sesuai pilihan dropdown sebelum disimpan. Variabel tema kini juga berlaku pada kelas `.theme-*` (bukan hanya `body.theme-*`) agar bisa di-scope ke pratinjau.
 - Cover otomatis galeri: `GET /api/albums` dan `/api/albums/{id}` mengembalikan `cover_display` = cover pilihan admin, atau foto pertama album bila kosong. Dipakai di halaman Galeri dan kartu galeri beranda.
 
+## Implemented (lanjutan 2)
+- Sosial media: `settings.instagram`, `tiktok`, `youtube` → ikon di header (desktop), menu mobile, dan footer (`components/Social.jsx`, ikon TikTok custom SVG).
+- Mode gelap: `context/DarkContext.jsx` (toggle di header publik & sidebar admin, tersimpan di localStorage, default ikut preferensi sistem). Palet gelap per tema via `body.dark.theme-*` di `index.css`.
+- Beranda disederhanakan: hanya banner besar (logo + nama + tagline + tombol "Portal Berita" & "Hubungi Kami") lalu strip sponsor. Banner bisa diganti/ditambah Super Admin lewat `settings.banner_file_ids`; bila lebih dari satu, tampil bergantian tiap 6 detik dengan indikator titik.
+- Upload logo/sponsor tetap transparan: `to_webp(keep_alpha=True)` untuk kind `logo`, `sponsor`, `support` (tidak lagi jadi latar hitam); kind `banner` disimpan lebih besar (maks 2200px, ~550KB).
+- Menu Sponsor & Dukungan: koleksi `partners` (nama, jenis sponsor/support, logo, tautan, urutan), CRUD di `/admin/sponsor`, halaman publik `/sponsor` + strip logo di beranda.
+- Impor keuangan via Excel: `GET /api/admin/finance-template.xlsx` (template + sheet Petunjuk) dan `POST /api/admin/finance-parse-excel` (validasi jenis/tanggal/jumlah, laporan error per baris) — hasil parsing masuk sebagai item draft, nota tetap wajib lewat alat sensor.
+
 ## Backlog
 - P0: tidak ada yang terbuka.
 - P1: pengujian UI mendalam (CRUD via UI, lightbox, submit form kontak), unggah nota dengan blur (bukan hanya blok hitam), pagination berita bila konten bertambah.

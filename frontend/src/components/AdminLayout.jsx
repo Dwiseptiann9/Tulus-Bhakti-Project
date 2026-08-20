@@ -1,9 +1,10 @@
 import { Link, NavLink, Navigate, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Newspaper, Images, Users, MapPinned, Wallet, Inbox,
-  Settings, ScrollText, UserCog, LogOut, Globe, HelpCircle,
+  Settings, ScrollText, UserCog, LogOut, Globe, HelpCircle, Handshake, Moon, Sun,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useDark } from "@/context/DarkContext";
 import { useLang } from "@/i18n";
 
 const items = [
@@ -14,6 +15,7 @@ const items = [
   ["/admin/rw-rt", "Data RW/RT", MapPinned, false],
   ["/admin/keuangan", "Keuangan", Wallet, false],
   ["/admin/faq", "Tanya Jawab", HelpCircle, false],
+  ["/admin/sponsor", "Sponsor & Dukungan", Handshake, false],
   ["/admin/inbox", "Inbox Pesan", Inbox, false],
   ["/admin/audit", "Audit Log", ScrollText, false],
   ["/admin/pengaturan", "Pengaturan", Settings, true],
@@ -24,6 +26,7 @@ export const AdminLayout = ({ children, title, actions }) => {
   const { user, logout, isSuper } = useAuth();
   const navigate = useNavigate();
   const { lang, setLang } = useLang();
+  const { dark, toggleDark } = useDark();
 
   if (user === null)
     return (
@@ -71,6 +74,14 @@ export const AdminLayout = ({ children, title, actions }) => {
             ))}
         </nav>
         <div className="p-3 mt-auto flex gap-2">
+          <button
+            onClick={toggleDark}
+            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border"
+            style={{ borderColor: "var(--line)" }}
+            data-testid="admin-dark-toggle"
+          >
+            {dark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
           <button
             onClick={() => setLang(lang === "id" ? "en" : "id")}
             className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border"

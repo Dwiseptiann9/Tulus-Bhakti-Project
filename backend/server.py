@@ -81,7 +81,9 @@ async def seed_content():
             "show_population": True, "contact_email": "delivered@resend.dev",
             "contact_phone": "0812-0000-0000",
             "address": "Jl. Balai Desa No. 1, Sukamaju",
-            "instagram": "karangtaruna.sukamaju", "whatsapp": "6281200000000",
+            "instagram": "karangtaruna.sukamaju", "tiktok": "karangtaruna.sukamaju",
+            "youtube": "@karangtarunasukamaju", "whatsapp": "6281200000000",
+            "banner_file_ids": [],
             "updated_at": now_iso()})
     if not await db.pages.find_one({"key": "profile"}):
         await db.pages.insert_one({

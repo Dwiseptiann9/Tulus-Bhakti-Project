@@ -46,15 +46,17 @@ def get_object(path: str):
     return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
 
 
-def to_webp(data: bytes, max_side: int = 1600, target_kb: int = 300) -> bytes:
+def to_webp(data: bytes, max_side: int = 1600, target_kb: int = 300, keep_alpha: bool = False) -> bytes:
     img = Image.open(io.BytesIO(data))
-    if img.mode in ("RGBA", "P", "LA"):
+    if keep_alpha:
+        img = img.convert("RGBA")
+    elif img.mode in ("RGBA", "P", "LA"):
         img = img.convert("RGB")
     img.thumbnail((max_side, max_side), Image.LANCZOS)
     quality = 85
     while True:
         buf = io.BytesIO()
-        img.save(buf, format="WEBP", quality=quality, method=4)
+        img.save(buf, format="WEBP", quality=quality, method=4, exact=keep_alpha)
         out = buf.getvalue()
         if len(out) <= target_kb * 1024 or quality <= 45:
             return out

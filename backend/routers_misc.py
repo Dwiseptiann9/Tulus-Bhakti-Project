@@ -13,6 +13,9 @@ from storage import APP_NAME, put_object, get_object, to_webp
 router = APIRouter(tags=["umum"])
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+# Logo & sponsor harus tetap transparan (tanpa latar hitam), banner dibiarkan besar.
+ALPHA_KINDS = {"logo", "sponsor", "support"}
+BIG_KINDS = {"banner"}
 
 
 # ---------- Upload & serve berkas ----------
@@ -28,7 +31,11 @@ async def upload_file(file: UploadFile = File(...), kind: str = Form("umum"),
         raise HTTPException(status_code=400,
                             detail="Nota harus disensor dan dikonfirmasi sebelum diunggah")
     try:
-        data = to_webp(raw)
+        keep_alpha = kind in ALPHA_KINDS
+        if kind in BIG_KINDS:
+            data = to_webp(raw, max_side=2200, target_kb=550)
+        else:
+            data = to_webp(raw, keep_alpha=keep_alpha)
     except Exception:
         raise HTTPException(status_code=400, detail="Gambar tidak dapat diproses")
     file_id = new_id()
@@ -66,12 +73,15 @@ class SettingsBody(BaseModel):
     tagline_en: Optional[str] = None
     season_theme: str = Field(default="netral", pattern="^(netral|idul_fitri|idul_adha|kemerdekaan)$")
     logo_file_ids: list[str] = []
+    banner_file_ids: list[str] = []
     org_names: list[str] = []
     show_population: bool = True
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     address: Optional[str] = None
     instagram: Optional[str] = None
+    tiktok: Optional[str] = None
+    youtube: Optional[str] = None
     whatsapp: Optional[str] = None
 
 
@@ -94,6 +104,50 @@ async def update_settings(body: SettingsBody, user: dict = Depends(require_super
     await db.settings.update_one({"key": "site"}, {"$set": updates}, upsert=True)
     await audit(user, "ubah_pengaturan", "site", body.season_theme)
     return await db.settings.find_one({"key": "site"}, {"_id": 0})
+
+
+# ---------- Sponsor & Dukungan ----------
+class PartnerBody(BaseModel):
+    name: str = Field(min_length=2, max_length=90)
+    type: str = Field(pattern="^(sponsor|support)$")
+    logo_file_id: Optional[str] = None
+    url: Optional[str] = None
+    note_id: Optional[str] = None
+    note_en: Optional[str] = None
+    order: int = 0
+
+
+@router.get("/partners")
+async def list_partners():
+    return await db.partners.find({}, {"_id": 0}).sort([("type", 1), ("order", 1)]).to_list(200)
+
+
+@router.post("/admin/partners")
+async def create_partner(body: PartnerBody, user: dict = Depends(require_admin)):
+    doc = body.model_dump()
+    doc.update({"id": new_id(), "updated_at": now_iso()})
+    await db.partners.insert_one(doc)
+    await audit(user, "buat_partner", doc["id"], f"{body.type} / {body.name}")
+    doc.pop("_id", None)
+    return doc
+
+
+@router.put("/admin/partners/{partner_id}")
+async def update_partner(partner_id: str, body: PartnerBody, user: dict = Depends(require_admin)):
+    updates = body.model_dump()
+    updates["updated_at"] = now_iso()
+    res = await db.partners.update_one({"id": partner_id}, {"$set": updates})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    await audit(user, "ubah_partner", partner_id, body.name)
+    return await db.partners.find_one({"id": partner_id}, {"_id": 0})
+
+
+@router.delete("/admin/partners/{partner_id}")
+async def delete_partner(partner_id: str, user: dict = Depends(require_admin)):
+    await db.partners.delete_one({"id": partner_id})
+    await audit(user, "hapus_partner", partner_id)
+    return {"ok": True}
 
 
 # ---------- Captcha + Hubungi Kami ----------

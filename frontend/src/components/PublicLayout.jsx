@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Languages, Instagram, ShieldCheck } from "lucide-react";
+import { Menu, X, Languages, ShieldCheck, Moon, Sun } from "lucide-react";
 import { useLang } from "@/i18n";
 import { useSettings } from "@/context/SettingsContext";
+import { useDark } from "@/context/DarkContext";
 import { fileUrl } from "@/lib/api";
 import { ThemeRibbon } from "@/components/ThemeDecor";
+import { SocialRow } from "@/components/Social";
 
 const links = [
   ["/", "nav_home"],
@@ -14,12 +16,14 @@ const links = [
   ["/tentang", "nav_about"],
   ["/struktur", "nav_structure"],
   ["/rw-rt", "nav_rwrt"],
+  ["/sponsor", "nav_sponsor"],
   ["/kontak", "nav_contact"],
 ];
 
 export const PublicLayout = ({ children }) => {
   const { t, lang, setLang } = useLang();
   const { settings } = useSettings();
+  const { dark, toggleDark } = useDark();
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const logos = settings.logo_file_ids || [];
@@ -27,14 +31,13 @@ export const PublicLayout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col" data-testid="public-layout">
       <header className="no-print sticky top-0 z-50 backdrop-blur-xl bg-[var(--surface)]/85">
-        {/* Baris 1: identitas + aksi */}
         <div className="border-b" style={{ borderColor: "var(--line)" }}>
           <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-3 min-w-0" data-testid="site-logo-link">
               {logos.length > 0 ? (
                 <span className="flex items-center gap-1.5 shrink-0">
                   {logos.slice(0, 3).map((id) => (
-                    <img key={id} src={fileUrl(id)} alt="logo" className="h-8 w-8 object-contain" />
+                    <img key={id} src={fileUrl(id)} alt="logo" className="logo-safe h-8 w-8 object-contain" />
                   ))}
                 </span>
               ) : (
@@ -56,19 +59,19 @@ export const PublicLayout = ({ children }) => {
             </Link>
 
             <div className="flex items-center gap-2 shrink-0">
-              {settings.instagram && (
-                <a
-                  href={`https://instagram.com/${settings.instagram}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hidden sm:grid place-items-center h-9 w-9 rounded-full border transition-colors hover:bg-[var(--muted)]"
-                  style={{ borderColor: "var(--line)" }}
-                  data-testid="header-instagram"
-                  aria-label="Instagram"
-                >
-                  <Instagram size={15} />
-                </a>
-              )}
+              <span className="hidden md:block">
+                <SocialRow settings={settings} testPrefix="header-social" />
+              </span>
+              <button
+                data-testid="dark-toggle"
+                onClick={toggleDark}
+                aria-label={dark ? t("dark_off") : t("dark_on")}
+                title={dark ? t("dark_off") : t("dark_on")}
+                className="grid place-items-center h-9 w-9 rounded-full border transition-colors hover:bg-[var(--muted)]"
+                style={{ borderColor: "var(--line)" }}
+              >
+                {dark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
               <button
                 data-testid="lang-toggle"
                 onClick={() => setLang(lang === "id" ? "en" : "id")}
@@ -98,12 +101,8 @@ export const PublicLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Baris 2: navigasi satu baris, scroll horizontal bila sempit */}
-        <nav
-          className="hidden lg:block border-b"
-          style={{ borderColor: "var(--line)", background: "var(--surface)" }}
-        >
-          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center gap-7 h-12 overflow-x-auto">
+        <nav className="hidden lg:block border-b" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center gap-6 h-12 overflow-x-auto">
             {links.map(([to, key]) => (
               <NavLink
                 key={to}
@@ -146,6 +145,9 @@ export const PublicLayout = ({ children }) => {
             >
               {t("admin_area")}
             </Link>
+            <div className="pt-3">
+              <SocialRow settings={settings} testPrefix="mobile-social" />
+            </div>
           </div>
         )}
 
@@ -154,21 +156,21 @@ export const PublicLayout = ({ children }) => {
 
       <main className="flex-1">{children}</main>
 
-      <footer
-        className="no-print mt-24 border-t"
-        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
-      >
+      <footer className="no-print mt-24 border-t" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 grid gap-12 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2 mb-4">
               {logos.slice(0, 3).map((id) => (
-                <img key={id} src={fileUrl(id)} alt="logo" className="h-10 w-10 object-contain" />
+                <img key={id} src={fileUrl(id)} alt="logo" className="logo-safe h-10 w-10 object-contain" />
               ))}
             </div>
             <h3 className="font-display text-xl font-bold">{settings.site_name}</h3>
             <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--muted-fg)" }}>
               {lang === "en" ? settings.tagline_en || settings.tagline_id : settings.tagline_id}
             </p>
+            <div className="mt-5">
+              <SocialRow settings={settings} testPrefix="footer-social" />
+            </div>
           </div>
           <div>
             <p className="text-xs tracking-[0.2em] uppercase mb-4" style={{ color: "var(--muted-fg)" }}>
@@ -189,11 +191,6 @@ export const PublicLayout = ({ children }) => {
             <p className="text-sm">{settings.address}</p>
             <p className="text-sm mt-1">{settings.contact_phone}</p>
             <p className="text-sm mt-1">{settings.contact_email}</p>
-            {settings.instagram && (
-              <p className="text-sm mt-3 flex items-center gap-1.5">
-                <Instagram size={14} /> @{settings.instagram}
-              </p>
-            )}
           </div>
         </div>
         <div

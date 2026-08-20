@@ -119,12 +119,15 @@ export function SettingsAdmin() {
         tagline_en: settings.tagline_en || "",
         season_theme: settings.season_theme || "netral",
         logo_file_ids: settings.logo_file_ids || [],
+        banner_file_ids: settings.banner_file_ids || [],
         org_names: settings.org_names || [],
         show_population: settings.show_population !== false,
         contact_email: settings.contact_email || "",
         contact_phone: settings.contact_phone || "",
         address: settings.address || "",
         instagram: settings.instagram || "",
+        tiktok: settings.tiktok || "",
+        youtube: settings.youtube || "",
         whatsapp: settings.whatsapp || "",
       });
   }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -260,6 +263,43 @@ export function SettingsAdmin() {
                 )}
               </div>
             </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--muted-fg)" }}>
+                Banner beranda (bisa lebih dari satu, tampil bergantian)
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                {form.banner_file_ids.map((id) => (
+                  <span key={id} className="relative">
+                    <img
+                      src={`${process.env.REACT_APP_BACKEND_URL}/api/files/${id}`}
+                      alt=""
+                      className="h-16 w-28 object-cover border rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({ ...form, banner_file_ids: form.banner_file_ids.filter((x) => x !== id) })
+                      }
+                      className="absolute -top-2 -right-2 p-1 rounded-full text-white"
+                      style={{ background: "#B3261E" }}
+                      data-testid={`banner-remove-${id}`}
+                    >
+                      <Trash2 size={10} />
+                    </button>
+                  </span>
+                ))}
+                <ImageUpload
+                  label="Tambah banner"
+                  kind="banner"
+                  value={null}
+                  onChange={(id) => id && setForm({ ...form, banner_file_ids: [...form.banner_file_ids, id] })}
+                />
+              </div>
+              <p className="text-xs mt-2" style={{ color: "var(--muted-fg)" }}>
+                Disarankan gambar melebar (misal 1920×1080). Bila kosong, dipakai banner bawaan.
+              </p>
+            </div>
+
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -295,12 +335,31 @@ export function SettingsAdmin() {
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                 />
               </Field>
-              <Field label="Instagram">
+              <Field label="Instagram (username)">
                 <input
+                  data-testid="settings-instagram"
                   className={input}
                   style={inputStyle}
                   value={form.instagram}
                   onChange={(e) => setForm({ ...form, instagram: e.target.value })}
+                />
+              </Field>
+              <Field label="TikTok (username)">
+                <input
+                  data-testid="settings-tiktok"
+                  className={input}
+                  style={inputStyle}
+                  value={form.tiktok}
+                  onChange={(e) => setForm({ ...form, tiktok: e.target.value })}
+                />
+              </Field>
+              <Field label="YouTube (@handle atau tautan)">
+                <input
+                  data-testid="settings-youtube"
+                  className={input}
+                  style={inputStyle}
+                  value={form.youtube}
+                  onChange={(e) => setForm({ ...form, youtube: e.target.value })}
                 />
               </Field>
               <Field label="WhatsApp (628...)">
@@ -367,6 +426,158 @@ export function SettingsAdmin() {
             </form>
           </Card>
         )}
+      </div>
+    </AdminLayout>
+  );
+}
+
+export function PartnersAdmin() {
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState(null);
+
+  const load = () => api.get("/partners").then(({ data }) => setItems(data)).catch(() => {});
+  useEffect(() => {
+    load();
+  }, []);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: form.name,
+      type: form.type,
+      logo_file_id: form.logo_file_id || null,
+      url: form.url || null,
+      note_id: form.note_id || null,
+      note_en: form.note_en || null,
+      order: Number(form.order) || 0,
+    };
+    try {
+      if (form.id) await api.put(`/admin/partners/${form.id}`, payload);
+      else await api.post("/admin/partners", payload);
+      toast.success("Data disimpan");
+      setForm(null);
+      load();
+    } catch (err) {
+      toast.error(errText(err));
+    }
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm("Hapus data ini?")) return;
+    await api.delete(`/admin/partners/${id}`);
+    load();
+  };
+
+  const empty = { name: "", type: "sponsor", logo_file_id: null, url: "", note_id: "", order: 0 };
+
+  return (
+    <AdminLayout
+      title="Sponsor & Dukungan"
+      actions={
+        <Btn onClick={() => setForm({ ...empty })} data-testid="partner-new-btn">
+          <span className="flex items-center gap-2">
+            <Plus size={14} /> Tambah
+          </span>
+        </Btn>
+      }
+    >
+      {form && (
+        <Card className="mb-6">
+          <form onSubmit={submit} className="space-y-4" data-testid="partner-form">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nama">
+                <input
+                  required
+                  data-testid="partner-name"
+                  className={input}
+                  style={inputStyle}
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </Field>
+              <Field label="Jenis">
+                <select
+                  data-testid="partner-type"
+                  className={input}
+                  style={inputStyle}
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                >
+                  <option value="sponsor">Sponsor</option>
+                  <option value="support">Dukungan</option>
+                </select>
+              </Field>
+              <Field label="Tautan (opsional)">
+                <input
+                  data-testid="partner-url"
+                  className={input}
+                  style={inputStyle}
+                  placeholder="https://"
+                  value={form.url || ""}
+                  onChange={(e) => setForm({ ...form, url: e.target.value })}
+                />
+              </Field>
+              <Field label="Urutan">
+                <input
+                  type="number"
+                  className={input}
+                  style={inputStyle}
+                  value={form.order}
+                  onChange={(e) => setForm({ ...form, order: e.target.value })}
+                />
+              </Field>
+            </div>
+            <ImageUpload
+              label="Logo (PNG transparan tetap transparan)"
+              kind="sponsor"
+              value={form.logo_file_id}
+              onChange={(id) => setForm({ ...form, logo_file_id: id })}
+            />
+            <div className="flex gap-2">
+              <Btn type="submit" data-testid="partner-save-btn">
+                Simpan
+              </Btn>
+              <Btn type="button" variant="ghost" onClick={() => setForm(null)}>
+                Batal
+              </Btn>
+            </div>
+          </form>
+        </Card>
+      )}
+      <div className="grid gap-3 md:grid-cols-2" data-testid="admin-partner-list">
+        {items.map((p) => (
+          <Card key={p.id} className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              {p.logo_file_id ? (
+                <img
+                  src={`${process.env.REACT_APP_BACKEND_URL}/api/files/${p.logo_file_id}`}
+                  alt=""
+                  className="logo-safe h-12 w-12 object-contain"
+                />
+              ) : (
+                <span className="h-12 w-12 rounded-full grid place-items-center" style={{ background: "var(--muted)" }}>
+                  {p.name.slice(0, 1)}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="font-display font-bold truncate">{p.name}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--muted-fg)" }}>
+                  {p.type === "sponsor" ? "Sponsor" : "Dukungan"}
+                  {p.url ? " · ada tautan" : ""}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Btn variant="ghost" onClick={() => setForm({ ...empty, ...p })} data-testid={`partner-edit-${p.id}`}>
+                Edit
+              </Btn>
+              <Btn variant="danger" onClick={() => remove(p.id)} data-testid={`partner-delete-${p.id}`}>
+                <Trash2 size={14} />
+              </Btn>
+            </div>
+          </Card>
+        ))}
+        {items.length === 0 && <p className="text-sm">Belum ada sponsor atau pendukung.</p>}
       </div>
     </AdminLayout>
   );

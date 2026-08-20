@@ -1,6 +1,10 @@
+import io
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.utils import get_column_letter
 from pydantic import BaseModel, Field
 
 from core import db, require_admin, require_super, audit, new_id, now_iso
@@ -51,6 +55,127 @@ async def list_reports():
     reports = await db.finance.find({"status": PUBLISHED},
                                     {"_id": 0, "items": 0}).sort("event_date", -1).to_list(200)
     return reports
+
+
+EXCEL_HEADERS = ["jenis", "tanggal", "keterangan", "jumlah"]
+EXCEL_MEDIA = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+@router.get("/admin/finance-template.xlsx")
+async def finance_template(user: dict = Depends(require_admin)):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Rincian"
+    header_fill = PatternFill("solid", fgColor="1A2F24")
+    for i, h in enumerate(["Jenis (masuk/keluar)", "Tanggal (YYYY-MM-DD)", "Keterangan",
+                           "Jumlah (Rupiah, angka bulat)"], start=1):
+        c = ws.cell(row=1, column=i, value=h)
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = header_fill
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+        ws.column_dimensions[get_column_letter(i)].width = 30
+    ws.row_dimensions[1].height = 30
+    contoh = [
+        ["masuk", "2026-06-10", "Iuran peserta turnamen", 3600000],
+        ["masuk", "2026-06-12", "Donasi warga RW 02", 1500000],
+        ["keluar", "2026-06-14", "Pembelian bola dan net", 1850000],
+        ["keluar", "2026-06-20", "Konsumsi panitia", 1240000],
+    ]
+    for row in contoh:
+        ws.append(row)
+    for r in range(2, 2 + len(contoh)):
+        ws.cell(row=r, column=4).number_format = "#,##0"
+
+    info = wb.create_sheet("Petunjuk")
+    for i, line in enumerate([
+        "Cara memakai template ini",
+        "",
+        "1. Isi satu baris untuk setiap penerimaan atau pengeluaran.",
+        "2. Kolom Jenis hanya boleh berisi: masuk atau keluar.",
+        "3. Kolom Tanggal memakai format YYYY-MM-DD, contoh 2026-06-10.",
+        "4. Kolom Jumlah diisi angka rupiah bulat tanpa titik, koma, atau tulisan 'Rp'.",
+        "5. Hapus baris contoh sebelum mengunggah.",
+        "6. Unggah berkas ini di menu Keuangan -> Impor Excel. Nota tetap diunggah manual",
+        "   melalui alat sensor agar NIK dan nomor HP tidak ikut tersebar.",
+    ], start=1):
+        c = info.cell(row=i, column=1, value=line)
+        if i == 1:
+            c.font = Font(bold=True, size=13)
+    info.column_dimensions["A"].width = 95
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return Response(
+        content=buf.getvalue(), media_type=EXCEL_MEDIA,
+        headers={"Content-Disposition": 'attachment; filename="template-laporan-keuangan.xlsx"'})
+
+
+def _parse_amount(value) -> int:
+    if value is None or value == "":
+        raise ValueError("jumlah kosong")
+    if isinstance(value, (int, float)):
+        return int(round(value))
+    txt = str(value).lower().replace("rp", "").replace(" ", "").replace(".", "").replace(",", "")
+    if not txt.isdigit():
+        raise ValueError(f"jumlah '{value}' bukan angka")
+    return int(txt)
+
+
+def _parse_date(value) -> Optional[str]:
+    if value is None or value == "":
+        return None
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d")
+    return str(value)[:10]
+
+
+@router.post("/admin/finance-parse-excel")
+async def parse_finance_excel(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    if not (file.filename or "").lower().endswith((".xlsx", ".xlsm")):
+        raise HTTPException(status_code=400, detail="Gunakan berkas Excel .xlsx sesuai template")
+    raw = await file.read()
+    if len(raw) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Ukuran berkas maksimal 5MB")
+    try:
+        wb = load_workbook(io.BytesIO(raw), data_only=True)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Berkas Excel tidak dapat dibaca")
+    ws = wb["Rincian"] if "Rincian" in wb.sheetnames else wb.worksheets[0]
+
+    items, errors = [], []
+    for idx, row in enumerate(ws.iter_rows(min_row=2, max_col=4, values_only=True), start=2):
+        if row is None or all(c is None or str(c).strip() == "" for c in row):
+            continue
+        jenis, tanggal, keterangan, jumlah = (list(row) + [None] * 4)[:4]
+        jenis = str(jenis or "").strip().lower()
+        if jenis in ("in", "pemasukan", "penerimaan"):
+            jenis = "masuk"
+        if jenis in ("out", "pengeluaran"):
+            jenis = "keluar"
+        if jenis not in ("masuk", "keluar"):
+            errors.append(f"Baris {idx}: jenis harus 'masuk' atau 'keluar'")
+            continue
+        if not str(keterangan or "").strip():
+            errors.append(f"Baris {idx}: keterangan wajib diisi")
+            continue
+        try:
+            amount = _parse_amount(jumlah)
+        except ValueError as e:
+            errors.append(f"Baris {idx}: {e}")
+            continue
+        if amount <= 0:
+            errors.append(f"Baris {idx}: jumlah harus lebih dari 0")
+            continue
+        items.append({"type": jenis, "date": _parse_date(tanggal),
+                      "description": str(keterangan).strip()[:200], "amount": amount,
+                      "receipt_file_id": None, "receipt_public": True})
+
+    if not items and errors:
+        raise HTTPException(status_code=400, detail=" · ".join(errors[:5]))
+    await audit(user, "impor_excel_keuangan", "", f"{len(items)} item, {len(errors)} error")
+    return {"items": items, "errors": errors,
+            "total_in": sum(i["amount"] for i in items if i["type"] == "masuk"),
+            "total_out": sum(i["amount"] for i in items if i["type"] == "keluar")}
 
 
 @router.get("/finance/summary/yearly")
