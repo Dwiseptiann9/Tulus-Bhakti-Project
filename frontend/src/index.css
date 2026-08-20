@@ -37,26 +37,53 @@
     --radius: 0.6rem;
 }
 
-body.theme-lebaran {
-    --bg: #F7FAF9;
+body.theme-idul_fitri {
+    --bg: #F6FAF7;
     --surface: #FFFFFF;
-    --fg: #0A1F16;
-    --primary: #054C38;
-    --line: #E0E8E5;
-    --muted: #EDF3F1;
+    --fg: #0C231A;
+    --primary: #0B6B4F;
+    --line: #DFEAE4;
+    --muted: #EBF3EE;
     --muted-fg: #4A6B5E;
-    --accent: #D4AF37;
+    --accent: #D4A017;
 }
 
-body.theme-agustus17 {
-    --bg: #FAFAFA;
+body.theme-idul_adha {
+    --bg: #FAF7F2;
     --surface: #FFFFFF;
-    --fg: #2B1A1A;
-    --primary: #D32F2F;
-    --line: #F0E6E6;
-    --muted: #F6EDED;
+    --fg: #2A1D12;
+    --primary: #8A5A2B;
+    --line: #EBE2D6;
+    --muted: #F3ECE2;
+    --muted-fg: #6E5B47;
+    --accent: #C8A46A;
+}
+
+body.theme-kemerdekaan {
+    --bg: #FBFAFA;
+    --surface: #FFFFFF;
+    --fg: #221414;
+    --primary: #C1121F;
+    --line: #EFE4E4;
+    --muted: #F6EEEE;
     --muted-fg: #7A5C5C;
-    --accent: #2B1A1A;
+    --accent: #221414;
+}
+
+@keyframes floatY {
+    0%, 100% { transform: translateY(0) rotate(var(--spin, 0deg)); }
+    50% { transform: translateY(-10px) rotate(var(--spin, 0deg)); }
+}
+.motif-float { animation: floatY 6s ease-in-out infinite; }
+
+@keyframes marqueeX {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+.motif-marquee { animation: marqueeX 40s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+    .motif-float, .motif-marquee { animation: none; }
 }
 
 body {

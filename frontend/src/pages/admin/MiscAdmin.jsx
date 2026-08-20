@@ -204,9 +204,10 @@ export function SettingsAdmin() {
                 value={form.season_theme}
                 onChange={(e) => setForm({ ...form, season_theme: e.target.value })}
               >
-                <option value="netral">Netral</option>
-                <option value="lebaran">Lebaran</option>
-                <option value="agustus17">17 Agustus</option>
+                <option value="netral">Natural (tanpa dekorasi)</option>
+                <option value="idul_fitri">Idul Fitri (ketupat, bulan, lentera)</option>
+                <option value="idul_adha">Idul Adha (hewan kurban, masjid)</option>
+                <option value="kemerdekaan">Hari Kemerdekaan (garuda, merah putih)</option>
               </select>
             </Field>
             <Field label="Nama organisasi (pisahkan dengan koma)">

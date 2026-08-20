@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
-import { api, fileUrl, fmtDate } from "@/lib/api";
+import { api, newsImage, fmtDate } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { Section, LangNote } from "@/components/PublicLayout";
 
@@ -88,9 +88,7 @@ export default function News() {
               className="rise rounded-xl border overflow-hidden transition-transform hover:-translate-y-1"
               style={{ background: "var(--surface)", borderColor: "var(--line)", animationDelay: `${i * 50}ms` }}
             >
-              {n.cover_file_id && (
-                <img src={fileUrl(n.cover_file_id)} alt="" loading="lazy" className="w-full h-44 object-cover" />
-              )}
+              <img src={newsImage(n, i)} alt="" loading="lazy" className="w-full h-44 object-cover" />
               <div className="p-6">
                 <span className="text-[10px] tracking-[0.16em] uppercase" style={{ color: "var(--primary)" }}>
                   {n.category === "kegiatan" ? t("activity") : t("news")} · {fmtDate(n.event_date, lang)}

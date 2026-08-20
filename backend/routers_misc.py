@@ -64,7 +64,7 @@ class SettingsBody(BaseModel):
     site_name: str = Field(min_length=2, max_length=90)
     tagline_id: Optional[str] = None
     tagline_en: Optional[str] = None
-    season_theme: str = Field(default="netral", pattern="^(netral|lebaran|agustus17)$")
+    season_theme: str = Field(default="netral", pattern="^(netral|idul_fitri|idul_adha|kemerdekaan)$")
     logo_file_ids: list[str] = []
     org_names: list[str] = []
     show_population: bool = True
@@ -75,10 +75,16 @@ class SettingsBody(BaseModel):
     whatsapp: Optional[str] = None
 
 
+LEGACY_THEMES = {"lebaran": "idul_fitri", "agustus17": "kemerdekaan"}
+
+
 @router.get("/settings")
 async def get_settings():
     doc = await db.settings.find_one({"key": "site"}, {"_id": 0})
-    return doc or {"key": "site", "site_name": "Portal Desa Digital", "season_theme": "netral"}
+    if not doc:
+        return {"key": "site", "site_name": "Portal Desa Digital", "season_theme": "netral"}
+    doc["season_theme"] = LEGACY_THEMES.get(doc.get("season_theme"), doc.get("season_theme") or "netral")
+    return doc
 
 
 @router.put("/admin/settings")

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { api, fileUrl, fmtDate } from "@/lib/api";
+import { api, newsImage, fmtDate } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { Section, LangNote } from "@/components/PublicLayout";
 import { ShareButton } from "@/components/ShareButton";
@@ -56,9 +56,9 @@ export default function NewsDetail() {
         {title.value}
         <LangNote show={title.fallback} />
       </h1>
-      {item.cover_file_id && (
+      {item.cover_file_id !== undefined && (
         <img
-          src={fileUrl(item.cover_file_id)}
+          src={newsImage(item)}
           alt=""
           className="mt-10 w-full rounded-xl object-cover max-h-[70vh]"
           loading="lazy"

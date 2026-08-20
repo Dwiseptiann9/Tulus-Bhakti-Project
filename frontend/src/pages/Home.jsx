@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, Wallet, Images } from "lucide-react";
-import { api, fileUrl, fmtDate, rupiah } from "@/lib/api";
+import { ArrowRight, CalendarDays, Mail, Images, Newspaper } from "lucide-react";
+import { api, newsImage, fmtDate, rupiah } from "@/lib/api";
 import { useLang } from "@/i18n";
 import { useSettings } from "@/context/SettingsContext";
 import { Section, LangNote } from "@/components/PublicLayout";
+import { ThemeHeroDecor, ThemeAccentIcon } from "@/components/ThemeDecor";
 
 const HERO = "https://images.pexels.com/photos/15830193/pexels-photo-15830193.jpeg";
 
@@ -34,9 +35,11 @@ export default function Home() {
     <div data-testid="home-page">
       <div className="relative overflow-hidden grain">
         <img src={HERO} alt="Desa" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(15,35,25,0.88) 0%, rgba(15,35,25,0.55) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(15,35,25,0.9) 0%, rgba(15,35,25,0.6) 100%)" }} />
+        <ThemeHeroDecor />
         <Section className="relative py-24 sm:py-32">
-          <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-5">
+          <p className="text-xs tracking-[0.2em] uppercase text-white/70 mb-5 flex items-center gap-3">
+            <ThemeAccentIcon size={20} />
             {(settings.org_names || []).join(" · ")}
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white max-w-3xl leading-[1.02]">
@@ -47,19 +50,19 @@ export default function Home() {
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
-              to="/keuangan"
-              data-testid="hero-finance-btn"
+              to="/berita"
+              data-testid="hero-news-btn"
               className="flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
               style={{ background: "var(--primary)" }}
             >
-              <Wallet size={16} /> {t("nav_finance")}
+              <Newspaper size={16} /> {t("nav_news")}
             </Link>
             <Link
-              to="/berita"
-              data-testid="hero-news-btn"
+              to="/kontak"
+              data-testid="hero-contact-btn"
               className="flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-semibold bg-white/10 text-white border border-white/25 backdrop-blur-md transition-colors hover:bg-white/20"
             >
-              {t("nav_news")} <ArrowRight size={16} />
+              <Mail size={16} /> {t("nav_contact")} <ArrowRight size={15} />
             </Link>
           </div>
         </Section>
@@ -119,14 +122,12 @@ export default function Home() {
                     className="rise rounded-xl border overflow-hidden transition-transform hover:-translate-y-1"
                     style={{ background: "var(--surface)", borderColor: "var(--line)", animationDelay: `${i * 60}ms` }}
                   >
-                    {n.cover_file_id && (
-                      <img
-                        src={fileUrl(n.cover_file_id)}
-                        alt=""
-                        loading="lazy"
-                        className="w-full h-40 object-cover"
-                      />
-                    )}
+                    <img
+                      src={newsImage(n, i)}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-40 object-cover"
+                    />
                     <div className="p-5">
                       <span
                         className="text-[10px] tracking-[0.16em] uppercase"

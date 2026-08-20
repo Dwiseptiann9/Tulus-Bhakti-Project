@@ -18,8 +18,12 @@ FONT_CANDIDATES = [
 
 THEMES = {
     "netral": ("#1A2F24", "#C85A40"),
-    "lebaran": ("#0A1F16", "#D4AF37"),
-    "agustus17": ("#2B1A1A", "#D32F2F"),
+    "idul_fitri": ("#0C231A", "#D4A017"),
+    "idul_adha": ("#2A1D12", "#C8A46A"),
+    "kemerdekaan": ("#221414", "#C1121F"),
+    # legacy keys
+    "lebaran": ("#0C231A", "#D4A017"),
+    "agustus17": ("#221414", "#C1121F"),
 }
 
 

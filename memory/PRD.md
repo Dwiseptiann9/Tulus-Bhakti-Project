@@ -34,6 +34,14 @@ Portal publik untuk Karang Taruna + Forum Desa: berita kegiatan, galeri, profil 
 - Kartu gambar bagikan otomatis: `GET /api/og/news/{slug}.png` dan `GET /api/og/finance/{id}.png` menghasilkan kartu 1200x630 (Pillow) mengikuti warna tema musiman aktif; laporan keuangan menampilkan total masuk/keluar/saldo. Tautan bagikan mengarah ke landing `GET /api/share/berita/{slug}` & `/api/share/keuangan/{id}` yang menyajikan meta Open Graph lalu redirect ke halaman SPA — perlu karena crawler WhatsApp tidak menjalankan JavaScript.
 - Filter tahun pada grafik Ringkasan Kas Tahunan (dropdown Semua tahun / per tahun), saldo ringkasan mengikuti pilihan.
 
+## Tema musiman (4 pilihan, interaktif)
+Dipilih Super Admin di `/admin/pengaturan`, tersimpan di `settings.season_theme`:
+1. `netral` — Natural, tanpa dekorasi tambahan.
+2. `idul_fitri` — palet hijau/emas + motif SVG ketupat, bulan sabit, lentera, masjid; ribbon ucapan berjalan + motif mengapung di hero.
+3. `idul_adha` — palet cokelat tanah/sand + motif hewan kurban (kambing), bulan sabit, masjid.
+4. `kemerdekaan` — palet merah/putih + motif garuda, bendera, bintang, dan strip merah-putih.
+Komponen: `components/ThemeDecor.jsx` (`ThemeRibbon`, `ThemeHeroDecor`, `ThemeAccentIcon`); kartu bagikan OG mengikuti warna tema. Nilai lama `lebaran`/`agustus17` otomatis dipetakan ke tema baru.
+
 ## Backlog
 - P0: tidak ada yang terbuka.
 - P1: pengujian UI mendalam (CRUD via UI, lightbox, submit form kontak), unggah nota dengan blur (bukan hanya blok hitam), pagination berita bila konten bertambah.

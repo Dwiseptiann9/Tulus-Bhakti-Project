@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Languages, Sparkles, ShieldCheck } from "lucide-react";
+import { Menu, X, Languages, Instagram, ShieldCheck } from "lucide-react";
 import { useLang } from "@/i18n";
 import { useSettings } from "@/context/SettingsContext";
 import { fileUrl } from "@/lib/api";
+import { ThemeRibbon } from "@/components/ThemeDecor";
 
 const links = [
   ["/", "nav_home"],
@@ -25,55 +26,53 @@ export const PublicLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col" data-testid="public-layout">
-      <header className="no-print sticky top-0 z-50 backdrop-blur-xl bg-[var(--surface)]/80 border-b border-[var(--line)]">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex items-center justify-between h-20 gap-4">
+      <header className="no-print sticky top-0 z-50 backdrop-blur-xl bg-[var(--surface)]/85">
+        {/* Baris 1: identitas + aksi */}
+        <div className="border-b" style={{ borderColor: "var(--line)" }}>
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-3 min-w-0" data-testid="site-logo-link">
               {logos.length > 0 ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 shrink-0">
                   {logos.slice(0, 3).map((id) => (
-                    <img key={id} src={fileUrl(id)} alt="logo" className="h-9 w-9 object-contain" />
+                    <img key={id} src={fileUrl(id)} alt="logo" className="h-8 w-8 object-contain" />
                   ))}
                 </span>
               ) : (
                 <span
-                  className="h-10 w-10 grid place-items-center rounded-lg text-white text-sm font-bold font-display"
+                  className="h-9 w-9 shrink-0 grid place-items-center rounded-lg text-white text-xs font-bold font-display"
                   style={{ background: "var(--primary)" }}
                 >
                   KT
                 </span>
               )}
-              <span className="min-w-0">
-                <span className="block font-display text-base font-bold leading-tight truncate max-w-[190px] sm:max-w-none">
+              <span className="min-w-0 leading-tight">
+                <span className="block font-display text-sm sm:text-base font-bold truncate max-w-[46vw] sm:max-w-[420px]">
                   {settings.site_name || "Portal Desa Digital"}
                 </span>
-                <span className="hidden sm:block text-xs" style={{ color: "var(--muted-fg)" }}>
+                <span className="hidden sm:block text-[11px] truncate max-w-[420px]" style={{ color: "var(--muted-fg)" }}>
                   {(settings.org_names || []).join(" · ")}
                 </span>
               </span>
             </Link>
 
-            <nav className="hidden xl:flex items-center gap-6">
-              {links.map(([to, key]) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  data-testid={`nav-${key}`}
-                  className={({ isActive }) =>
-                    `text-sm link-underline transition-colors ${isActive ? "font-semibold" : ""}`
-                  }
-                  style={({ isActive }) => ({ color: isActive ? "var(--primary)" : "var(--fg)" })}
+            <div className="flex items-center gap-2 shrink-0">
+              {settings.instagram && (
+                <a
+                  href={`https://instagram.com/${settings.instagram}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hidden sm:grid place-items-center h-9 w-9 rounded-full border transition-colors hover:bg-[var(--muted)]"
+                  style={{ borderColor: "var(--line)" }}
+                  data-testid="header-instagram"
+                  aria-label="Instagram"
                 >
-                  {t(key)}
-                </NavLink>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-2">
+                  <Instagram size={15} />
+                </a>
+              )}
               <button
                 data-testid="lang-toggle"
                 onClick={() => setLang(lang === "id" ? "en" : "id")}
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full border transition-colors hover:bg-[var(--muted)]"
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 h-9 rounded-full border transition-colors hover:bg-[var(--muted)]"
                 style={{ borderColor: "var(--line)" }}
               >
                 <Languages size={14} /> {lang.toUpperCase()}
@@ -81,25 +80,49 @@ export const PublicLayout = ({ children }) => {
               <Link
                 to="/admin/login"
                 data-testid="header-admin-link"
-                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full text-white transition-opacity hover:opacity-90"
+                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-4 h-9 rounded-full text-white transition-opacity hover:opacity-90"
                 style={{ background: "var(--primary)" }}
               >
                 <ShieldCheck size={14} /> {t("admin_area")}
               </Link>
               <button
                 data-testid="mobile-menu-btn"
-                className="xl:hidden p-2"
+                className="lg:hidden grid place-items-center h-9 w-9 rounded-full border"
+                style={{ borderColor: "var(--line)" }}
                 onClick={() => setOpen(!open)}
                 aria-label="menu"
               >
-                {open ? <X size={22} /> : <Menu size={22} />}
+                {open ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Baris 2: navigasi satu baris, scroll horizontal bila sempit */}
+        <nav
+          className="hidden lg:block border-b"
+          style={{ borderColor: "var(--line)", background: "var(--surface)" }}
+        >
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center gap-7 h-12 overflow-x-auto">
+            {links.map(([to, key]) => (
+              <NavLink
+                key={to}
+                to={to}
+                data-testid={`nav-${key}`}
+                className={({ isActive }) =>
+                  `text-[13px] whitespace-nowrap link-underline transition-colors ${isActive ? "font-semibold" : ""}`
+                }
+                style={({ isActive }) => ({ color: isActive ? "var(--primary)" : "var(--fg)" })}
+              >
+                {t(key)}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+
         {open && (
           <div
-            className="xl:hidden border-t px-5 py-4 space-y-1 bg-[var(--surface)]"
+            className="lg:hidden border-b px-5 py-3 bg-[var(--surface)]"
             style={{ borderColor: "var(--line)" }}
             data-testid="mobile-menu"
           >
@@ -125,6 +148,8 @@ export const PublicLayout = ({ children }) => {
             </Link>
           </div>
         )}
+
+        <ThemeRibbon />
       </header>
 
       <main className="flex-1">{children}</main>
@@ -166,7 +191,7 @@ export const PublicLayout = ({ children }) => {
             <p className="text-sm mt-1">{settings.contact_email}</p>
             {settings.instagram && (
               <p className="text-sm mt-3 flex items-center gap-1.5">
-                <Sparkles size={14} /> @{settings.instagram}
+                <Instagram size={14} /> @{settings.instagram}
               </p>
             )}
           </div>
@@ -187,7 +212,6 @@ export const Section = ({ children, className = "" }) => (
 );
 
 export const LangNote = ({ show }) => {
-  const { t } = useLang();
   if (!show) return null;
   return (
     <span
